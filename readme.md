@@ -4,10 +4,13 @@
 Cargo.toml
 
     [dependencies] 
+    stderr = "*"
+or 
+    [dependencies] 
     stderr = { git = "https://github.com/biluohc/stderr" }  
 
 ## Explain 
-* Usage as same as print!/println!.
+Usage as same as print!/println!.
 * stderr!/stderrln!: Writing to standard error failed will panic this thread.
 * stderr_qt!/stderr_qtln!: Writing to standard error failed will do nothing.
 
