@@ -12,8 +12,8 @@ or
 
 ## Explain 
 Usage as same as print!/println!.
-* stderr!/stderrln!: Writing to standard error failed will panic this thread.
-* stderr_qt!/stderr_qtln!: Writing to standard error failed will do nothing.
+* stderr!/stderrln!: Writing to standard error failed will panic this thread(behavior like print!/println!).
+* stderr_qt!/stderr_qtln!: Writing to standard error failed will do nothing(quiet->qt).
 
 ## Example  
     #[macro_use]
