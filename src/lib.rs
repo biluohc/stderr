@@ -6,7 +6,7 @@ pub fn stderr(msg: &str) {
     match io::stderr().write(msg.as_bytes()) {    
         Ok(_) => {}
         Err(e) => panic!("panic!: to stderr'{}' met '{}'", msg, e.description()),
-        // Writing to standard error failed and panic this thread.
+        // Writing to standard error failed will panic this thread.
     };
 }
 #[macro_export]
@@ -31,7 +31,7 @@ macro_rules! stderrln {
 pub fn stderr_qt(msg: &str) {
     match io::stderr().write(msg.as_bytes()) {    
         Ok(_) => {}
-        Err(_) => {}  //Writing to standard error failed and do nothing.
+        Err(_) => {}  //Writing to standard error failed will do nothing.
     };
 }
 #[macro_export]
