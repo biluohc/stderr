@@ -5,7 +5,7 @@ authors = ["biluohc <biluohc@outlook.com>"]
 
 # A short blurb about the package. This is not rendered in any format when
 # uploaded to crates.io (aka this is not markdown).
-description = "A stderr ouput library usage like print!/println!. "
+description = "A stderr output library usage like print!/println!. "
 
 # These URLs point to more information about the repository.
 # documentation = "..."
