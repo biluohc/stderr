@@ -5,7 +5,7 @@ authors = ["biluohc <biluohc@outlook.com>"]
 
 # A short blurb about the package. This is not rendered in any format when
 # uploaded to crates.io (aka this is not markdown).
-description = "A library that using macro to write io::stderr() like print!/println!."
+description = "A library that using macro to write to io::stderr() like print!/println!."
 
 # These URLs point to more information about the repository.
 # documentation = "..."
@@ -16,7 +16,7 @@ repository = "https://github.com/biluohc/stderr"
 # contents of this file are stored and indexed in the registry.
 readme = "readme.md"
 
-keywords = ["err","errst","stderr","macro","print"]
+keywords = ["stderr","err","errst","macro","print"]
 
 license = "MIT"
 
