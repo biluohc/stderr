@@ -16,7 +16,7 @@ repository = "https://github.com/biluohc/stderr"
 # contents of this file are stored and indexed in the registry.
 readme = "readme.md"
 
-keywords = ["err","errln","errst","errstln","stderr","macro","print","println"]
+keywords = ["err","errst","stderr","macro","print"]
 
 license = "MIT"
 
