@@ -3,21 +3,27 @@
 ## Usage
 Cargo.toml
 
-    [dependencies] 
-    stderr = "0.2.1"
-or   
-    
-    [dependencies]  
-    stderr = { git = "https://github.com/biluohc/stderr",branch = "master" ,version ="0.2.1"}   
+```toml
+[dependencies]
+stderr = "0.2.1"
+```
 
-## Explain 
-Usage as same as print!/println!.  
-1. err!/errln!: Panics if writing to io::stdout() fails.  
-2. errst!/errstln!: Do nothing if writing to io::stdout() fails(silent->st). 
+or
 
-## Example  
+```toml
+[dependencies]
+stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.2.1"}
+```
 
-``` 
+## Explain
+Usage as same as print!/println!.
+
+1. `err!`/`errln!`: Panics if writing to `io::stdout()` fails.
+2. `errst!`/`errstln!`: Do nothing if writing to `io::stdout()` fails(silent->st).
+
+## Example
+
+```rust
 #[macro_use]
 extern crate stderr;
 
@@ -42,4 +48,5 @@ fn main() {
     for (i, x) in vec.iter().enumerate() {
         errstln!("errstln!(expr,tt) {}: {}", i, x);
     }
-} 
+}
+```
