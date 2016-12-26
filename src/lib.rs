@@ -1,52 +1,46 @@
-use std::io::{self, Write};
-use std::error::Error;
-
-// stderr!,stderrln!
-pub fn stderr(msg: &str) {
-    match io::stderr().write(msg.as_bytes()) {    
+// err!,errln!
+#[macro_export]
+macro_rules! err {
+    ($($arg:tt)*) => {
+        {
+        use std::io::{self, Write};
+        use std::error::Error;
+        let str=format!($($arg)*);
+    match io::stderr().write(&str.as_bytes()) {
         Ok(_) => {}
-        Err(e) => panic!("panic!: to stderr'{}' met '{}'", msg, e.description()),
-        // Writing to standard error failed will panic this thread.
+        Err(e) => panic!("panic!: to err! '{}' met '{}'", &str, e.description()),
+        // Panics if writing to io::stdout() fails.
     };
-}
-#[macro_export]
-macro_rules! stderr {
-    ($($arg:tt)*) => {
-        {let string=format!($($arg)*);
-        stderr(&string);
         }
         };
 }
-
 #[macro_export]
-macro_rules! stderrln {
-    ($($arg:tt)*) => {
-        {let string=format!($($arg)*)+"\n";
-        stderr(&string);
-        }
-        };
+macro_rules! errln {
+       () => (err!("\n"));
+       ($fmt:expr) => (err!(concat!($fmt, "\n")));
+        ($fmt:expr, $($arg:tt)*) => (err!(concat!($fmt, "\n"), $($arg)*));
+        // Panics if writing to io::stdout() fails.
 }
 
-// stderr_qt!,stderr_qtln!
-pub fn stderr_qt(msg: &str) {
-    match io::stderr().write(msg.as_bytes()) {    
+// errst!,errstln!
+#[macro_export]
+macro_rules! errst {
+    ($($arg:tt)*) => {
+        {
+        use std::io::{self, Write};
+        let str=format!($($arg)*);
+    match io::stderr().write(&str.as_bytes()) {
         Ok(_) => {}
-        Err(_) => {}  //Writing to standard error failed will do nothing.
+        Err(_) => {}
+        // Do nothing if writing to io::stdout() fails(silent->st).
     };
-}
-#[macro_export]
-macro_rules! stderr_qt {
-    ($($arg:tt)*) => {
-        {let string=format!($($arg)*);
-        stderr_qt(&string);
         }
         };
 }
 #[macro_export]
-macro_rules! stderr_qtln {
-    ($($arg:tt)*) => {
-        {let string=format!($($arg)*)+"\n";
-        stderr_qt(&string);
-        }
-        };
+macro_rules! errstln {
+       () => (errst!("\n"));
+       ($fmt:expr) => (errst!(concat!($fmt, "\n")));
+        ($fmt:expr, $($arg:tt)*) => (errst!(concat!($fmt, "\n"), $($arg)*));
+        // Do nothing if writing to io::stdout() fails(silent->st).
 }
