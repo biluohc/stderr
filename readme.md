@@ -4,11 +4,11 @@
 Cargo.toml
 
     [dependencies] 
-    stderr = "0.2.0"
+    stderr = "0.2.1"
 or   
     
     [dependencies]  
-    stderr = { git = "https://github.com/biluohc/stderr",branch = "master" ,version ="0.2.0"}   
+    stderr = { git = "https://github.com/biluohc/stderr",branch = "master" ,version ="0.2.1"}   
 
 ## Explain 
 Usage as same as print!/println!.  
