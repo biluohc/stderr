@@ -4,12 +4,16 @@ macro_rules! err {
     ($($arg:tt)*) => {
         {
         use std::io::{self, Write};
-        use std::error::Error;
-        let str=&format!($($arg)*);
-        match io::stderr().write(str.as_bytes()) {
-            Ok(_) => {}
-            Err(e) => panic!("panic!: to err! '{}' met '{}'", str, e.description()),
-            // Panics if writing to io::stdout() fails.
+        // use std::error::Error;
+        // let str=&format!($($arg)*);
+        // match io::stderr().write(str.as_bytes()) {
+        //     Ok(_) => {}
+        //     Err(e) => panic!("panic!: to err! '{}' met '{}'", str, e.description()),
+        //     // Panics if writing to io::stdout() fails.
+        // };
+        match write!(&mut io::stderr(),$($arg)* ) {
+            Ok(..)=>{},
+            Err(e)=>panic!(e),
         };
         }
         };
@@ -28,8 +32,8 @@ macro_rules! errst {
     ($($arg:tt)*) => {
         {
         use std::io::{self, Write};
-        let str=&format!($($arg)*);
-        if let Ok(..) = io::stderr().write(str.as_bytes()) {};
+        // let str=&format!($($arg)*);
+        if let Ok(..) =  write!(&mut io::stderr(),$($arg)* ) {};
         // Do nothing if writing to io::stdout() fails(silent->st).
         }
         };
