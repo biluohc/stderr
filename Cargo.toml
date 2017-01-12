@@ -1,6 +1,6 @@
 [package]
 name = "stderr"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["biluohc <biluohc@outlook.com>"]
 
 # A short blurb about the package. This is not rendered in any format when
@@ -16,7 +16,7 @@ repository = "https://github.com/biluohc/stderr"
 # contents of this file are stored and indexed in the registry.
 readme = "readme.md"
 
-keywords = ["stderr","err","errst","macro","print"]
+keywords = ["err","errst","macro","print"]
 
 license = "MIT"
 

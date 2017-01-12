@@ -5,14 +5,14 @@ Cargo.toml
 
 ```toml
 [dependencies]
-stderr = "0.2.2"
+stderr = "0.3.0"
 ```
 
 or
 
 ```toml
 [dependencies]
-stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.2.2"}
+stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.3.0"}
 ```
 
 ## Explain
