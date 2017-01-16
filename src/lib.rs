@@ -1,3 +1,6 @@
+#[macro_use]
+pub mod loger;
+
 // err!,errln!
 #[macro_export]
 macro_rules! err {
