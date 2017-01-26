@@ -1,3 +1,4 @@
+use std::mem::forget;
 use std::env::args;
 use std::env::var;
 use std::slice;
@@ -16,7 +17,7 @@ static mut LOGER: Loger = Loger {
     len: 0,
     status: false,
 };
-
+// 不知道string的那个from_raw_parts方法也这样搞是不是也对。
 const KEY_VAR: &'static str = "LOG"; // env LOG=*
 const KEY_ARG: &'static str = "log"; // exe -log[--log]
 
@@ -46,9 +47,12 @@ impl Loger {
                 idx += 1;
             }
         }
+        let ptr = mp.as_str().as_ptr();
+        let len = mp.len();
+        forget(mp);
         unsafe {
-            LOGER.ptr = mp.as_str().as_ptr();
-            LOGER.len = mp.len();
+            LOGER.ptr = ptr;
+            LOGER.len = len;
             LOGER.status = status;
         }
     }
@@ -62,6 +66,8 @@ impl Loger {
     // #[doc(hidden)]
     pub fn mp_parse(module_path: &'static str) -> bool {
         let refer = Self::get();
+        // println!("mp_parse()-Debug: {:?}@{:?}", refer, module_path);
+        // println!("mp_parse()-Display: {}@{}", refer, module_path);
         //"*"匹配的全部。
         if refer == "*" {
             return true;
@@ -71,7 +77,8 @@ impl Loger {
             return true;
         }
         //属于该模块。
-        if module_path.starts_with(&refer) && (&module_path[refer.len()..]).starts_with(':') {
+        // println!("mp_parse()-slice: {:?}", &module_path[refer.len()..]);
+        if module_path.starts_with(&refer) && (&module_path[refer.len()..]).starts_with(":") {
             return true;
         }
         false
@@ -90,7 +97,7 @@ macro_rules! init {
 #[macro_export]
 macro_rules! db {
     ($($arg:tt)*) => {
-        {     
+        {      
              if Loger::status() &&Loger::mp_parse(module_path!()) {
                 use std::io::{self, Write};
                 // Panics if writing to io::stdout() fails.                
