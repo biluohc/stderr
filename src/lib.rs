@@ -34,6 +34,7 @@
 //!
 //!```bash
 //!   env LOG=app  app_file_path
+//!   env LOG=     app_file_path
 //!   app_file_path --log app
 //!   app_file_path --log
 //!```

@@ -17,7 +17,7 @@ static mut LOGER: Loger = Loger {
     len: 0,
     status: false,
 };
-// 不知道string的那个from_raw_parts方法也这样搞是不是也对。
+// string的from_raw_parts方法也这样搞不对(莫名其妙)。
 const KEY_VAR: &'static str = "LOG"; // env LOG=*
 const KEY_ARG: &'static str = "log"; // exe -log[--log]
 
