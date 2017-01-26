@@ -17,7 +17,7 @@ static mut LOGER: Loger = Loger {
     len: 0,
     status: false,
 };
-// string的from_raw_parts方法也这样搞不对(莫名其妙)。
+// string的from_raw_parts方法这样搞不对(莫名其妙)。
 const KEY_VAR: &'static str = "LOG"; // env LOG=*
 const KEY_ARG: &'static str = "log"; // exe -log[--log]
 
@@ -88,10 +88,12 @@ impl Loger {
 #[macro_export]
 macro_rules! init {
     () => {
+        //避免重复初始化。
+        if !Loger::status() {
         let msg= module_path!();
         //fht2p::server::args::app -> fht2p
         let sep_idx= msg.find(":").unwrap_or(msg.len()) ;
-        Loger::set(&msg[..sep_idx] );
+        Loger::set(&msg[..sep_idx] );}
     };
 }
 #[macro_export]

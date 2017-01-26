@@ -8,13 +8,13 @@
 //!
 //! ```toml
 //!  [dependencies]
-//!  stderr = "0.6.0"
+//!  stderr = "0.6.1"
 //! ```
 //! or
 //!
 //! ```toml
 //!  [dependencies]
-//!  poolite = { git = "https://github.com/biluohc/stderr",branch = "master", version = "0.6.0" }
+//!  poolite = { git = "https://github.com/biluohc/stderr",branch = "master", version = "0.6.1" }
 //! ```
 //!
 //!## About stderr
@@ -35,8 +35,13 @@
 //!```bash
 //!   env LOG=app  app_file_path
 //!   env LOG=     app_file_path
+//!   env LOG=app::mod1         app_file_path
+//!   env LOG=app::mod1::mod2   app_file_path
+//!
 //!   app_file_path --log app
 //!   app_file_path --log
+//!   app_file_path --log app::mod1
+//!   app_file_path --log app::mod1::mod2
 //!```
 //!If you neend to use `db!(),dbln!()` ,etc:
 //!

@@ -5,12 +5,12 @@ Cargo.toml
 
 ```toml
 [dependencies]
-stderr = "0.6.0"
+stderr = "0.6.1"
 ```
 or
 ```toml
 [dependencies]
-stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.6.0"}
+stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.6.1"}
 ```
 
 ## Documentation  
@@ -55,6 +55,8 @@ fn main() {
 }
 ```
 ## ChangLog
+2017-0126 **0.6.1** Don't repeat initialization,fix #2.
+
 2017-0126 **0.6.0** Refactoring and update API to `stderr::Loger; init!(),db!(),dbln!(),dbst!(),dbstln!()` for `LOG=module_path!()` and `--log/-log module_path!()`,add Documentation.
 
 2017-0116 __0.5.0__ Add `stderr::loger::Loger;init(), debug!(),debugln!(),debugst!(),debugstln!()` for `LOG=debug` and `--log/-log debug`.
