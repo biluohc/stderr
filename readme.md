@@ -1,40 +1,22 @@
-# A Rust's library that using macro to write io::stderr() for error or io::stdout() for log optional.
+# A library that using macro to write to io::stderr() like print!()/println!() for Rust.
 
 ## Usage
 Cargo.toml
 
 ```toml
 [dependencies]
-stderr = "0.5.0"
+stderr = "0.6.0"
 ```
 or
 ```toml
 [dependencies]
-stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.5.0"}
+stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.6.0"}
 ```
 
-## Explain
-### About stderr
-Usage as same as print!/println!.
-
-1. `err!`/`errln!`: Panics if writing to `io::stdout()` fails.
-2. `errst!`/`errstln!`: Do nothing if writing to `io::stdout()` fails(silent->st).
-
-### About stderr::loger::Loger
-Avoid to note or use a bunch of `print!()/println!()` non-stop.  
-`debug!()`/`debugln!()` print message while args conntains `-log` or `--log` and `debug` follows it,or environment variable 'LOG' == `debug`.  
-Usage as same as `err!`/`errln!` and `errst!`/`errstln!`.
-
-Example for bash:
-```bash
-    env LOG=debug  your_exe_file_path --log debug
-```  
-If you neend to use `debug!()`/`debugln!()`:
-You must use `Loger::init()` before use the macro on the current process.  
-if you need to contrl it:  
-You can use `Loger::set(bool)` to replace `Loger::init()`,  
-`Loger::arg()`: Get args's `-log/--log`==`debug` value(bool),  
-`Loger::var()`: Get environment variable's `LOG`==`debug` value(bool).  
+## Documentation  
+* Visit [https://docs.rs/stderr/](https://docs.rs/stderr/)  
+or 
+* Run `cargo doc --open` after modified the toml file.
 
 ## Example
 
@@ -59,17 +41,20 @@ fn main() {
     errstln!();
     errstln!("errstln!(expr)");
 
-    use stderr::loger::Loger;
-    Loger::init();
-    debugln!();
-    debugln!("debug!/debugln!()@Loger !");
-    debug!("{}\n", s);
-    debugln!("{:?}", vec);
+    use stderr::Loger;
+    init!(); //If you need to use `dbxxx`,you should run `init!()` before use them on current process.
+    dbln!();
+    dbln!("db!/dbln!()@Loger !");
+    db!("{}\n", s);
+    dbln!("{:?}", vec);
 
-    debugstln!();
-    debugstln!("debugst!/debugstln!()@Loger !");
-    debugst!("{}\n", s);
-    debugstln!("{:?}", vec);
+    dbstln!();
+    dbstln!("dbst!/dbstln!()@Loger !");
+    dbst!("{}\n", s);
+    dbstln!("{:?}", vec);
 }
 ```
+## ChangLog
+2017-0126 **0.6.0** Refactoring and update API to `stderr::Loger; init!(),db!(),dbln!(),dbst!(),dbstln!()` for `LOG=module_path!()` and `--log/-log module_path!()`,add Documentation.
 
+2017-0116 __0.5.0__ Add `stderr::loger::Loger;init(), debug!(),debugln!(),debugst!(),debugstln!()` for `LOG=debug` and `--log/-log debug`.

@@ -19,15 +19,15 @@ fn main() {
     errstln!();
     errstln!("errstln!(expr)");
 
-    use stderr::loger::Loger;
-    Loger::init();
-    debugln!();
-    debugln!("debug!/debugln!()@Loger !");
-    debug!("{}\n", s);
-    debugln!("{:?}", vec);
+    use stderr::Loger;
+    init!(); //If you need to use dbxxx,you should run `init!()` before use them on current process.
+    dbln!();
+    dbln!("db!/dbln!()@Loger !");
+    db!("{}\n", s);
+    dbln!("{:?}", vec);
 
-    debugstln!();
-    debugstln!("debugst!/debugstln!()@Loger !");
-    debugst!("{}\n", s);
-    debugstln!("{:?}", vec);
+    dbstln!();
+    dbstln!("dbst!/dbstln!()@Loger !");
+    dbst!("{}\n", s);
+    dbstln!("{:?}", vec);
 }

@@ -1,11 +1,11 @@
 [package]
 name = "stderr"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["biluohc <biluohc@outlook.com>"]
 
-description = "A library that using macro to write io::stderr() for error or io::stdout() for log optional like print!/println!."
+description = "A library that using macro to write to io::stderr() like print!()/println!()."
 
-# documentation = "..."
+documentation = "https://docs.rs/stderr/"
 # homepage = "..."
 repository = "https://github.com/biluohc/stderr"
 
@@ -16,6 +16,7 @@ keywords = ["err","errst","log","debug","print"]
 license = "MIT"
 
 [dependencies]
+# stderr= { path = "/home/viw/Documents/git/github/stderr" }
 
 [[test]]
 name ="main"
