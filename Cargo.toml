@@ -1,6 +1,6 @@
 [package]
 name = "stderr"
-version = "0.6.1"
+version = "0.7.0"
 authors = ["biluohc <biluohc@outlook.com>"]
 
 description = "A library that using macro to write to io::stderr() like print!()/println!()."

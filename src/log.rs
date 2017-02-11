@@ -6,7 +6,7 @@ use std::str;
 
 #[derive(Debug)]
 pub struct Loger {
-    // mod 路径 。通过init!()初始化(默认只打印当前 crate 的)，..用参数/环境变量设置
+    // mod 路径 。通过init!()初始化(默认打印所有 project 的)，..用命令行参数/环境变量设置（后者一设置，前者就不检查了）
     ptr: *const u8,
     len: usize,
     // log状态,默认关闭。
@@ -23,11 +23,11 @@ const KEY_ARG: &'static str = "log"; // exe -log[--log]
 
 impl Loger {
     pub fn set(module_path: &str) {
-        let (mut mp, mut status) = (module_path.to_owned(), false);
+        let (mut mp_tmp, mut status) = (module_path.to_owned(), false);
 
         // 取环境变量
         if let Ok(ok) = var(KEY_VAR) {
-            mp = ok;
+            mp_tmp = ok;
             status = true;
         }
         //环境变量为空则取命令行参数
@@ -37,16 +37,36 @@ impl Loger {
             for _ in 0..args_vec.len() {
                 if args_vec[idx] == format!("-{}", KEY_ARG) ||
                    args_vec[idx] == format!("--{}", KEY_ARG) {
-                    //如果无值，开启crate的log.
+                    //如果无值，开启当前package的log.
                     status = true;
                     if idx + 1 < args_vec.len() {
-                        mp = args_vec[idx + 1].clone();
+                        mp_tmp = args_vec[idx + 1].clone();
                     }
                     break;
                 }
                 idx += 1;
             }
         }
+        // 当同一个stderr时输出当前project的db!,当好几个stderr(crate),取决于其init!()(多半会输出所有的）.
+        let mp = if mp_tmp == "" {
+            module_path.to_owned()
+        } else {
+            let mps: Vec<&str> = mp_tmp.split(',').map(|s| s.trim()).filter(|s| s != &"").collect();
+            // println!("Loger::set()mps: {:?}", mps);
+            let mut mps = mps.iter().fold(String::new(), |new, &s| new + s + ",");
+            // avoid env LOG ',,,' assert_eq!() fails
+            if mps.is_empty() {
+                mps = mps + module_path + ",";
+            }
+            assert_eq!(mps.pop(), Some(',')); //remove a ","
+            mps
+        };
+        // println!("Loger::set()@module_path->mp_tmp->mp@Loger::status(): {:?}->{:?}->{:?}@{}",
+        //          module_path,
+        //          mp_tmp,
+        //          mp,
+        //          status);
+
         let ptr = mp.as_str().as_ptr();
         let len = mp.len();
         forget(mp);
@@ -56,30 +76,40 @@ impl Loger {
             LOGER.status = status;
         }
     }
+
+    #[inline]
     pub fn get() -> String {
         unsafe { String::from_utf8_lossy(slice::from_raw_parts(LOGER.ptr, LOGER.len)).into_owned() }
     }
+
+    #[inline]
     pub fn status() -> bool {
         unsafe { LOGER.status }
     }
 
     // #[doc(hidden)]
     pub fn mp_parse(module_path: &'static str) -> bool {
-        let refer = Self::get();
-        // println!("mp_parse()-Debug: {:?}@{:?}", refer, module_path);
-        // println!("mp_parse()-Display: {}@{}", refer, module_path);
+        // "fht2p,poolite"->["fht2p", "poolite"]
+        let mps_str = Self::get();
+        let mps: Vec<&str> = mps_str.split(',').collect();
+        // println!("mp_parse()@setting->mps<-->module_path!(): {:?}->{:?}<-->{:?}",
+        //          refer,
+        //          mps,
+        //          module_path);
         //"*"匹配的全部。
-        if refer == "*" {
+        if mps.contains(&"*") {
             return true;
         }
-        //完全匹配,避免后面切片失败。
-        if module_path == refer {
-            return true;
-        }
-        //属于该模块。
-        // println!("mp_parse()-slice: {:?}", &module_path[refer.len()..]);
-        if module_path.starts_with(&refer) && (&module_path[refer.len()..]).starts_with(":") {
-            return true;
+        for mp in mps {
+            //完全匹配,避免后面切片失败。
+            if module_path == mp {
+                return true;
+            }
+            //属于该模块。
+            // println!("mp_parse()-slice: {:?}", &module_path[mp.len()..]);
+            if module_path.starts_with(&mp) && (&module_path[mp.len()..]).starts_with(":") {
+                return true;
+            }
         }
         false
     }
