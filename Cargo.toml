@@ -1,6 +1,6 @@
 [package]
 name = "stderr"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["biluohc <biluohc@outlook.com>"]
 
 description = "A library that using macro to write to io::stderr() like print!()/println!()."
@@ -16,6 +16,7 @@ keywords = ["err","errst","log","debug","print"]
 license = "MIT"
 
 [dependencies]
+time = "0.1"
 # stderr= { path = "/home/viw/Documents/git/github/stderr" }
 
 [[test]]

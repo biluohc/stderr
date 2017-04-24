@@ -8,13 +8,7 @@
 //!
 //! ```toml
 //!  [dependencies]
-//!  stderr = "0.7.0"
-//! ```
-//! or
-//!
-//! ```toml
-//!  [dependencies]
-//!  poolite = { git = "https://github.com/biluohc/stderr",branch = "master", version = "0.7.0" }
+//!  stderr = "0.7.1"
 //! ```
 //!
 //!## About stderr
@@ -47,11 +41,11 @@
 //!  errstln!();
 //!  errstln!("errstln!(expr)");
 //!
-//!  // If you need to use `dbxxx!`,you must run `init!()` before use them on current process.
+//!  // If you need to use `dbxxx!`,you must run `Loger::init(module_path!())` or `init!()` before use them on current process.
 //!  // Otherwise you should ignore the following.
 //!
 //!  use stderr::Loger;  // `dbxxx!` belongs the module.
-//!  init!();
+//!  Loger::init(module_path!());
 //!  dbln!();
 //!  dbln!("db!/dbln!()@Loger !");
 //!  db!("{}\n", s);
@@ -107,8 +101,9 @@
 //!
 //!If you neend to use `db!(),dbln!()` ,etc:
 //!
-//!You must use `init!()` before use them on the current process.
+//!You must use `Loger::init(module_path!())` or `init!()` before use them on the current process.
 //!
+extern crate time;
 #[macro_use]
 mod log;
 pub use log::Loger;

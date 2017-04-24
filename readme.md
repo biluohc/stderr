@@ -5,12 +5,12 @@ Cargo.toml
 
 ```toml
 [dependencies]
-stderr = "0.7.0"
+stderr = "0.7.1"
 ```
 or
 ```toml
 [dependencies]
-stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.7.0"}
+stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.7.1"}
 ```
 
 ## Documentation  
@@ -41,8 +41,9 @@ fn main() {
     errstln!();
     errstln!("errstln!(expr)");
 
+    //If you need to use `dbxxx`,you should run `init!()` or `Loger::init(module_path!())` before use them on current process.
     use stderr::Loger;
-    init!(); //If you need to use `dbxxx`,you should run `init!()` before use them on current process.
+    Loger::init(module_path!()); 
     dbln!();
     dbln!("db!/dbln!()@Loger !");
     db!("{}\n", s);
@@ -55,6 +56,8 @@ fn main() {
 }
 ```
 ## ChangLog
+2017-0424 **0.7.1** `loc!()` and `Loger::init(module_path!())`
+
 2017-0211 **0.7.0** Supports multiple packages.
 
 2017-0126 **0.6.1** Don't repeat initialization,fix #2.

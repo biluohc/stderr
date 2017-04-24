@@ -20,7 +20,7 @@ fn main() {
     errstln!("errstln!(expr)");
 
     use stderr::Loger;
-    init!(); //If you need to use dbxxx,you should run `init!()` before use them on current process.
+    Loger::init(module_path!()); //If you need to use dbxxx,you should run `Loger::init()` before use them on current process.
     dbln!();
     dbln!("db!/dbln!()@Loger !");
     db!("{}\n", s);
