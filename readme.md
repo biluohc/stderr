@@ -1,3 +1,9 @@
+[![Build status](https://travis-ci.org/biluohc/stderr.svg?branch=master)](https://github.com/biluohc/stderr)
+[![Latest version](https://img.shields.io/crates/v/stderr.svg)](https://crates.io/crates/stderr)
+[![All downloads](https://img.shields.io/crates/d/stderr.svg)](https://crates.io/crates/stderr)
+[![Downloads of latest version](https://img.shields.io/crates/dv/stderr.svg)](https://crates.io/crates/stderr)
+[![Documentation](https://docs.rs/stderr/badge.svg)](https://docs.rs/stderr)
+
 # A library that using macro to write to io::stderr() like print!()/println!() for Rust.
 
 ## Usage
