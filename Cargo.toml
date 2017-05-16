@@ -1,6 +1,6 @@
 [package]
 name = "stderr"
-version = "0.7.1"
+version = "0.8.0"
 authors = ["biluohc <biluohc@outlook.com>"]
 
 description = "A library that using macro to write to io::stderr() like print!()/println!()."
@@ -15,7 +15,8 @@ license = "MIT"
 travis-ci = { repository = "biluohc/stderr" }
 
 [dependencies]
-time = "0.1"
+lazy_static = "^0.2.8"
+time = "^0.1.37"
 # stderr= { path = "/home/viw/Documents/git/github/stderr" }
 
 [[test]]

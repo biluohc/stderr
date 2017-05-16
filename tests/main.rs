@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate stderr;
+use stderr::log::*;
 
 #[test]
 fn main() {
@@ -19,8 +20,7 @@ fn main() {
     errstln!();
     errstln!("errstln!(expr)");
 
-    use stderr::Loger;
-    Loger::init(module_path!()); //If you need to use dbxxx,you should run `Loger::init()` before use them on current process.
+    Logger::init(pkg!()); //If you need to use dbxxx,you should run `Loger::init()` before use them on current process.
     dbln!();
     dbln!("db!/dbln!()@Loger !");
     db!("{}\n", s);

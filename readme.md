@@ -11,12 +11,12 @@ Cargo.toml
 
 ```toml
 [dependencies]
-stderr = "0.7.1"
+stderr = "0.8.0"
 ```
 or
 ```toml
 [dependencies]
-stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.7.1"}
+stderr = { git = "https://github.com/biluohc/stderr", branch = "master", version = "0.8.0"}
 ```
 
 ## Documentation  
@@ -27,8 +27,7 @@ or
 ## Example
 
 ```rust
-#[macro_use]
-extern crate stderr;
+#[macro_use] extern crate stderr;
 
 fn main() {
     println!("err!/errln!/errst!/errstln!()@stderr !");
@@ -48,8 +47,8 @@ fn main() {
     errstln!("errstln!(expr)");
 
     //If you need to use `dbxxx`,you should run `init!()` or `Loger::init(module_path!())` before use them on current process.
-    use stderr::Loger;
-    Loger::init(module_path!()); 
+    use stderr::log::*;
+    Logger::init(pkg!()); 
     dbln!();
     dbln!("db!/dbln!()@Loger !");
     db!("{}\n", s);
@@ -62,6 +61,8 @@ fn main() {
 }
 ```
 ## ChangLog
+2017-0508 **0.8.0** `log::*`
+
 2017-0424 **0.7.1** `loc!()` and `Loger::init(module_path!())`
 
 2017-0211 **0.7.0** Supports multiple packages.

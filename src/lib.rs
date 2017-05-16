@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //!  [dependencies]
-//!  stderr = "0.7.1"
+//!  stderr = "0.8.0"
 //! ```
 //!
 //!## About stderr
@@ -41,10 +41,10 @@
 //!  errstln!();
 //!  errstln!("errstln!(expr)");
 //!
-//!  // If you need to use `dbxxx!`,you must run `Loger::init(module_path!())` or `init!()` before use them on current process.
+//!  // If you need to use `dbxxx!`,you must run `Logger::init(pkg!())` or `logger_init!()` before use them on current process.
 //!  // Otherwise you should ignore the following.
 //!
-//!  use stderr::Loger;  // `dbxxx!` belongs the module.
+//!  use stderr::*;  // `dbxxx!` belongs the module.
 //!  Loger::init(module_path!());
 //!  dbln!();
 //!  dbln!("db!/dbln!()@Loger !");
@@ -58,7 +58,7 @@
 //!}
 //!```
 //!
-//!## About stderr::Loger
+//!## About stderr::log::*
 //!`db!()`/`dbln!()`/`dbst!()`/`dbstln!()` print message while command line arguments conntains `-log` or `--log`(follows as [`module_path!()`](https://doc.rust-lang.org/std/macro.module_path.html),
 //!if it has no followers(None) or followers by `''`,will print the message them occurred on current project(Use a stderr crate.)
 //!
@@ -103,12 +103,13 @@
 //!
 //!You must use `Loger::init(module_path!())` or `init!()` before use them on the current process.
 //!
-extern crate time;
 #[macro_use]
-mod log;
-pub use log::Loger;
+extern crate lazy_static;
+extern crate time;
+pub mod log;
 
 // err!,errln!
+/// `print!()` for stderr
 #[macro_export]
 macro_rules! err {
     ($($arg:tt)*) => {
@@ -119,6 +120,7 @@ macro_rules! err {
         }
         };
 }
+/// `println!()` for stderr
 #[macro_export]
 macro_rules! errln {
        () => (err!("\n"));
@@ -127,6 +129,7 @@ macro_rules! errln {
 }
 
 // errst!,errstln!
+/// `print!()` without `unwrap()` for stderr
 #[macro_export]
 macro_rules! errst {
     ($($arg:tt)*) => {
@@ -137,6 +140,7 @@ macro_rules! errst {
         }
         };
 }
+/// `println!()` without `unwrap()` for stderr
 #[macro_export]
 macro_rules! errstln {
        () => (errst!("\n"));

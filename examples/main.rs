@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate stderr;
-use stderr::Loger;
+use stderr::log::*;
 
 fn main() {
     init!();
@@ -18,10 +18,9 @@ fn main() {
 }
 
 mod y {
-    use super::Loger;
+    use stderr::log::*;
     pub fn ffmpeg() {
-        Loger::init(module_path!());
-        Loger::with_time(true);
+        Logger::init(pkg!());
         println!();
         db!("y");
         println!();
@@ -33,12 +32,11 @@ mod y {
         dbln!("y_ln");
         dbln!("y_ln {}", 1);
         dbln!("y_ln {}/{}", 1, 2);
-        Loger::with_time(false);        
         z::ffmpeg();
         z1::ffmpeg();
     }
     mod z {
-        use super::Loger;
+        use stderr::log::*;
         pub fn ffmpeg() {
             println!();
             db!("z");
@@ -54,7 +52,7 @@ mod y {
         }
     }
     mod z1 {
-        use super::Loger;
+        use stderr::log::*;
         pub fn ffmpeg() {
             println!();
             dbst!("st_z1");
