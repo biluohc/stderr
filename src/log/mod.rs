@@ -33,7 +33,8 @@ pub struct Logger {
 }
 
 impl Logger {
-    pub fn set_all_info() {
+    /// `info/*`
+    pub fn set_info_all() {
         Self::initialized_set(true);
         Self::enable_set(true);
         let mut logger = LOGGER.as_mut().unwrap();
@@ -117,7 +118,7 @@ impl Logger {
             }
         }
         if !Self::initialized() {
-            Self::set_all_info();
+            Self::set_info_all();
         }
         // println!("LOGER_after_cli: {:?}", LOGGER.get());
     }

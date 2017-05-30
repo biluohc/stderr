@@ -52,9 +52,9 @@ impl LogLvl {
             "fatal" | "1" => Some(LogLvl::Fatal),
             "error" | "2" => Some(LogLvl::Error),
             "warn" | "3" => Some(LogLvl::Warn),
-            "info" | "4" | "" => Some(LogLvl::Info),
+            "info" | "4"  => Some(LogLvl::Info),
             "debug" | "5" => Some(LogLvl::Debug),
-            "all" | "6" | "*" => Some(LogLvl::All),
+            "all" | "6" | "" | "*" => Some(LogLvl::All),
             _ => None, 
         }
     }
