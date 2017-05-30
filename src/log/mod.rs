@@ -2,28 +2,25 @@
 #[macro_use]
 mod macros;
 mod lvl;
-use self::lvl::LogLvlStr;
 pub use self::lvl::LogLvl;
+use super::StaticMut;
 
 use time::{now, Tm};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
 use std::collections::BTreeSet as Set;
 use std::collections::btree_set::Iter;
 use std::env::var;
-const KEY_VAR: &'static str = "LOG"; // env LOG=*
-//  set -x LOG "Info/"
-//  set -x LOG "/fht2p"
-//  set -x  LOG "Debug/fht2p::main,fht2p::main::{server,args}"
+use std::env::args;
+/// `"LOG"`
+pub static mut ENV_VAR_KEY: &'static str = "LOG";
+/// `["-log", "--log"]`
+pub static mut CLI_OPTION_KEYS: [&'static str; 2] = ["-log", "--log"];
 
-// init_by_args() level/mods
-// init_by_set()  level(num)/mods
 lazy_static!{
-    static ref LOGGER:OnceInit<Logger>=OnceInit::new(Logger::default());
-    static ref LogLvlStrs: Set<String> = LogLvlStr.split(' ')
-    .filter(|s|!s.trim().is_empty())
-    .map(|s|s.trim().to_string()).collect();
-    static ref LogFmterDefault:OnceInit<LogFmter> =OnceInit::new(LogFmter::default());
+    static ref LOGGER:StaticMut<Logger>=StaticMut::new(Logger::default());
+    static ref LogFmterDefault:StaticMut<LogFmter> =StaticMut::new(LogFmter::default());
 }
+static LogFmterInitialized: AtomicBool = ATOMIC_BOOL_INIT;
 
 /// Logger
 #[derive(Debug,Default)]
@@ -32,24 +29,49 @@ pub struct Logger {
     enabled: AtomicBool,
     max_lvl: LogLvl,
     mod_paths: Set<String>,
+    without_cli_options: AtomicBool,
 }
 
 impl Logger {
-    pub fn open() {
-        LOGGER.as_ref().enabled.store(true, Ordering::SeqCst);
+    pub fn set_all_info() {
+        Self::initialized_set(true);
+        Self::enable_set(true);
+        let mut logger = LOGGER.as_mut().unwrap();
+        logger.mod_paths.insert("*".to_string());
+        logger.max_lvl = LogLvl::Info;
     }
+    ///` Logger::enable_set(true)`
+    pub fn open() {
+        Self::enable_set(true);
+    }
+    /// `Logger::enable_set(false)`
     pub fn close() {
-        LOGGER.as_ref().enabled.store(false, Ordering::SeqCst);
+        Self::enable_set(false);
+    }
+    pub fn initialized() -> bool {
+        LOGGER.get().initialized.load(Ordering::Relaxed)
+    }
+    pub fn initialized_set(b: bool) {
+        LOGGER.get().initialized.store(b, Ordering::SeqCst);
     }
     pub fn enable() -> bool {
-        LOGGER.as_ref().enabled.load(Ordering::Relaxed)
+        LOGGER.get().enabled.load(Ordering::Relaxed)
+    }
+    pub fn enable_set(b: bool) {
+        LOGGER.get().enabled.store(b, Ordering::SeqCst);
+    }
+    pub fn without_cli_options() -> bool {
+        LOGGER.get().without_cli_options.load(Ordering::Relaxed)
+    }
+    pub fn without_cli_options_set(b: bool) {
+        LOGGER.get().without_cli_options.store(b, Ordering::SeqCst);
     }
     pub fn max_lvl() -> &'static LogLvl {
-        &LOGGER.as_ref().max_lvl
+        &LOGGER.get().max_lvl
     }
     /// `mod_path[s]`
     pub fn mps() -> Iter<'static, String> {
-        LOGGER.as_ref().mod_paths.iter()
+        LOGGER.get().mod_paths.iter()
     }
     /// The current time in the local timezone
     pub fn now() -> Tm {
@@ -60,76 +82,108 @@ impl Logger {
     /// `Logger::init(pkg!());` or `logger_int!()`
     ///
     /// **Notice**: `Logger` only init once time, other will be ignored.
-    pub fn init(crate_name: &'static str) {
-        Self::init_with_str(crate_name, var(KEY_VAR).ok());
-    }
-    /// `Logger` init by `crate_name` and `env_str`,then `Logger::open()`
-    ///
-    ///`Logger::init_with_str(pkg!(),Some("fht2p"));`
-    ///
-    /// **Notice**: `Logger` only init once time, other will be ignored.
-    pub fn init_with_str<S: Into<String>>(mut crate_name: &'static str, env_var: Option<S>) {
-        {
-            let mut logger = LOGGER.as_mut();
-            // avoid init second
-            if logger.initialized.load(Ordering::Relaxed) {
-                return;
-            }
-            logger.initialized.store(true, Ordering::SeqCst);
-            // Compatible with previous ``Logger::init(module_path!());
-            if crate_name.contains(':') {
-                let sep_idx = crate_name.find(':').unwrap();
-                crate_name = &crate_name[..sep_idx];
-            }
-
-            if let Some(s) = env_var {
-                let s = s.into();
-                let s = s.trim();
-                if !s.contains('/') && !s.contains(':') && !s.contains(',') &&
-                   LogLvlStrs.contains(s) {
-                    // level
-                    logger.max_lvl = LogLvl::from_str(s).unwrap();
-                    logger.mod_paths.insert(crate_name.to_string());
-                } else if s.is_empty() {
-                    // set -x "" => current-crate, All-Lvl
-                    logger.max_lvl = LogLvl::default();
-                    logger.mod_paths.insert(crate_name.to_string());
-                } else if !s.contains('/') {
-                    // mod path[s]
-                    logger.mod_paths = s.split(',')
-                        .filter(|ss| !ss.trim().is_empty())
-                        .map(|ss| ss.to_string())
-                        .collect();
-                } else {
-                    // contains "/"
-                    // "/h"[sep_idx+1..] => "h"
-                    // "/"[sep_idx+1..] => ""
-                    let sep_idx = s.find('/').unwrap();
-
-                    if s.ends_with('/') {
-                        // "level"
-                        logger.max_lvl = LogLvl::from_str(&s[..sep_idx + 1])
-                            .unwrap_or_else(LogLvl::default);
-                        logger.mod_paths.insert(crate_name.to_string());
-                    } else {
-                        // "path[s]" || "both"
-                        logger.max_lvl = LogLvl::from_str(&s[..sep_idx + 1])
-                            .unwrap_or_else(LogLvl::default);
-                        s[sep_idx + 1..]
-                            .split(',')
-                            .filter(|ss| !ss.trim().is_empty())
-                            .map(|ss| logger.mod_paths.insert(ss.to_string()))
-                            .count();
-
-                    }
-                }
+    fn cli_options(cli_option_keys: &[&'static str]) -> Option<String> {
+        let mut args: Vec<String> = args().skip(1).collect();
+        let idx = args.as_slice()
+            .iter()
+            .position(|s| cli_option_keys.iter().any(|ss| ss == &s.as_str()));
+        // println!("cli_options: {:?} -> {:?}", idx, args);
+        if let Some(idx) = idx {
+            if args.len() >= idx + 2 {
+                // println!("cli_options/args[idx+1 = {}]: {:?}",idx+1, args[idx + 1]);
+                return Some(args.remove(idx + 1));
             }
         }
+        None
+    }
+    pub fn init(crate_name: &'static str) {
+        if Self::initialized() {
+            return;
+        }
+        // println!("LOGER_before_env: {:?}\nenv::var({:?}): {:?}",
+        //          LOGGER.get(),
+        //          ENV_VAR_KEY,
+        //          var(ENV_VAR_KEY));
+        if let Ok(s) = var(unsafe { ENV_VAR_KEY }) {
+            Self::init_with_str(crate_name, s);
+        }
+        // println!("LOGER_after_env: {:?}\ncli::cli_options({:?}): {:?}",
+        //          LOGGER.get(),
+        //          CLI_OPTION_KEYS,
+        //          Self::cli_options(&CLI_OPTION_KEYS[..]));
+        if !Self::initialized() && !Self::without_cli_options() {
+            if let Some(s) = Self::cli_options(unsafe { &CLI_OPTION_KEYS[..] }) {
+                Self::init_with_str(crate_name, s);
+            }
+        }
+        if !Self::initialized() {
+            Self::set_all_info();
+        }
+        // println!("LOGER_after_cli: {:?}", LOGGER.get());
+    }
+    /// `Logger` init by `crate_name` and `var`, then `Logger::open()` if `var` is valid
+    ///
+    ///`Logger::init_with_str(pkg!(),"fht2p");`
+    ///
+    /// **Notice**: `Logger` only init once time, other will be ignored.
+    pub fn init_with_str<S: Into<String>>(mut crate_name: &'static str, var: S) {
+        // no_input    -> info/*
+        // /           -> all/pkg
+        // lvl/mods    -> lvl/mods
+        let mut logger = LOGGER.as_mut().unwrap();
+        // avoid init second
+        if logger.initialized.load(Ordering::Relaxed) {
+            return;
+        }
+        logger.initialized.store(true, Ordering::SeqCst);
+        // Compatible with previous ``Logger::init(module_path!());
+        if crate_name.contains(':') {
+            let sep_idx = crate_name.find(':').unwrap();
+            crate_name = &crate_name[..sep_idx];
+        }
+
+        let s = var.into();
+        let s = s.trim();
+        let sep_idx = s.find('/');
+        if sep_idx.is_none() {
+            //invalid input
+            return;
+        }
+        let sep_idx = sep_idx.unwrap();
+        let (lvl_str, mut mps_str) = (&s[..sep_idx], &s[sep_idx + 1..]);
+        // println!("lvl_str -> mps_str: {:?} -> {:?}", lvl_str, mps_str);
+        if mps_str.is_empty() {
+            mps_str = crate_name; // "" -> crate_name
+        }
+        // println!("{:?}", LogLvl::from_str(lvl_str));
+        if let Some(lvl) = LogLvl::from_str(lvl_str) {
+            logger.max_lvl = lvl;
+        } else {
+            return;
+        }
+        let mps: Vec<&str> = mps_str
+            .split(',')
+            .map(|ss| ss.trim().trim_matches(':'))
+            .filter(|ss| !ss.is_empty())
+            .collect();
+        // println!("mps: {:?}", mps);
+        if mps.contains(&"*") {
+            logger.mod_paths.insert("*".to_string());
+        } else {
+            mps.into_iter()
+                .map(|ss| logger.mod_paths.insert(ss.to_string()))
+                .last();
+        }
         Self::open();
+        // println!("LOGER: {:?}", logger);
     }
     ///Log message occurs at current module and current LogLvl whether need output
     pub fn filter(mod_path: &str, lvl: LogLvl) -> bool {
-        let logger = LOGGER.as_ref();
+        let logger = LOGGER.get();
+        // println!("LOGER::filter(mp: {:?},lvl: {:?}): {:?}",
+        //          mod_path,
+        //          lvl,
+        //          logger);
         if !logger.enabled.load(Ordering::Relaxed) {
             return false;
         }
@@ -186,6 +240,12 @@ impl LogLoc {
     pub fn file(&self) -> &'static str {
         self.file
     }
+    pub fn time_local(&self) -> &Tm {
+        &self.time_local
+    }
+    pub fn time_utc(&self) -> &Tm {
+        &self.time_utc
+    }
 }
 
 use std::fmt;
@@ -226,99 +286,71 @@ impl<'a> LogMsg<'a> {
 }
 
 /// Log Formater
-pub struct LogFmter {
-    fn_: Box<Fn(&LogMsg) -> String>,
-    initialized: AtomicBool,
-}
+pub struct LogFmter(Box<Fn(&LogMsg) -> String>);
 
 impl LogFmter {
-    /// Set only once
+    /// Set only once, default is [`fmter`](fn.fmter.html)
     ///
     ///`
     /// LogFmter::set(fmter);
     ///`
     pub fn set<F: IntoLogFmter>(f: F) {
-        if LogFmterDefault
-               .as_ref()
-               .initialized
-               .load(Ordering::Relaxed) {
+        if LogFmterInitialized.load(Ordering::Relaxed) {
             return;
         }
-        LogFmterDefault
-            .as_ref()
-            .initialized
-            .store(true, Ordering::SeqCst);
-        let fmter = LogFmterDefault.as_mut();
-        *fmter = f.into();
+        LogFmterInitialized.store(true, Ordering::SeqCst);
+        LogFmterDefault.set(f.into()).unwrap()
     }
     /// Format `&LogMesg` by `LogFmter`
     pub fn call(msg: &LogMsg) -> String {
-        (LogFmterDefault.as_ref().fn_)(msg)
+        (LogFmterDefault.get().0)(msg)
     }
 }
-fn fmter(msg: &LogMsg) -> String {
-    format!("[{}!]@{}:{}:{} {}",
+
+/// `[Debug!]#main:6:4 ..`
+pub fn fmter(msg: &LogMsg) -> String {
+    format!("[{}!]#{}:{}:{} {}",
             msg.lvl(),
             msg.loc().mp(),
             msg.loc().line(),
             msg.loc().column(),
             msg.msg())
 }
+
+///`[2017-05-30 13:10:00 Debug!]#main:12:8 ..`
+pub fn fmter_with_time(msg: &LogMsg) -> String {
+    let t = msg.loc().time_local();
+    format!("[{:04}-{:02}-{:02} {:02}:{:02}:{:02} {}!]#{}:{}:{} {}",
+            t.tm_year + 1900,
+            t.tm_mon + 1,
+            t.tm_mday,
+            t.tm_hour,
+            t.tm_min,
+            t.tm_sec,
+            msg.lvl(),
+            msg.loc().mp(),
+            msg.loc().line(),
+            msg.loc().column(),
+            msg.msg())
+}
+
 impl Default for LogFmter {
     fn default() -> LogFmter {
-        LogFmter {
-            fn_: (Box::new(fmter)),
-            initialized: AtomicBool::new(false),
-        }
+        LogFmter(Box::new(fmter))
     }
 }
 
-/// Format `LogMsg` by `Fn(&LogMsg) -> String + 'static + Send`
-///
-/// Default as follows:
-///
-///```rusful
-///fn fmter(msg: &LogMsg) -> String {
-///    format!("[{}!]@{}:{}:{} {}",
-///             msg.lvl(),
-///             msg.loc().mp(),
-///             msg.loc().line(),
-///             msg.loc().column(),
-///             msg.msg())
-/// }
-///```
+/**
+ Format `LogMsg` by `Fn(&LogMsg) -> String + 'static + Send`
+
+ Default as [`fmter`](fn.fmter.html), you can instead by [`fmter_with_time`](fn.fmter_with_time.html) or write a `fn` by youself.
+*/
 pub trait IntoLogFmter {
     fn into(self) -> LogFmter;
 }
 
 impl<F: Fn(&LogMsg) -> String + 'static + Send> IntoLogFmter for F {
     fn into(self) -> LogFmter {
-        LogFmter {
-            fn_: Box::new(self),
-            initialized: AtomicBool::new(true),
-        }
-    }
-}
-use self::o::OnceInit;
-mod o {
-    use std::marker::Sync;
-    use std::cell::UnsafeCell;
-
-    #[derive(Debug)]
-    pub struct OnceInit<T>(UnsafeCell<T>);
-    unsafe impl<T> Sync for OnceInit<T> {}
-    impl<T> OnceInit<T> {
-        pub fn new(value: T) -> Self {
-            OnceInit(UnsafeCell::new(value))
-        }
-        // init fisrt before use it
-        pub fn as_mut(&self) -> &mut T {
-            unsafe { self.0.get().as_mut().unwrap() }
-        }
-    }
-    impl<T> AsRef<T> for OnceInit<T> {
-        fn as_ref(&self) -> &T {
-            unsafe { self.0.get().as_ref().unwrap() }
-        }
+        LogFmter(Box::new(self))
     }
 }

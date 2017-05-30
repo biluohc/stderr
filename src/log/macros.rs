@@ -1,4 +1,10 @@
-/// Get `crate` name
+/**
+Get `crate` name
+
+```rustfull
+println!("{}",pkg!()); // -> www
+```
+*/
 #[macro_export]
 macro_rules! pkg {
     () => {
@@ -12,60 +18,62 @@ macro_rules! pkg {
     }
 }
 
-/// @`log `   Get location(`module_path:line:column`)
-///
-/// `LogLoc::new(module_path!(),line!(), column!(),file!())`
+/** Get location(`module_path:line:column`)
+
+```rustful
+println!("{}",loc!());    // module_path!():line!():clumn!() -> www::16::23
+println!("{:?}",loc!());  // LogLoc {...}
+```
+*/
 #[macro_export]
 macro_rules! loc {
     () => (
-    LogLoc::new(module_path!(),line!(), column!(),file!())
+    $crate::log::LogLoc::new(module_path!(),line!(), column!(),file!())
     )
 }
 
-/// @`log `   Equal to `logger_init!()` or `Loger::init(pkg!())`
-#[deprecated(since = "0.7.1",note = "Should use `logger_init!()` or `Loger::init(pkg!())` instead")]
+/// Equal to `logger_init!()`
+#[deprecated(since = "0.7.1",note = "Should use `logger_init!()` instead")]
 #[macro_export]
 macro_rules! init {
     () => {
-        Logger::init(module_path!());
+        logger_init!();
     };
 }
 
-/// @`log `   Equal to `Logger::init(pkg!())`
+/// Equal to `Logger::init(pkg!())`
 #[macro_export]
 macro_rules! logger_init {
     () => {
-        Logger::init(pkg!());
+        $crate::log::Logger::init(pkg!());
     };
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! db {
         ($($arg:tt)*) => (
-                if Logger::enable() &&Logger::filter( pkg!(),LogLvl::Debug) {
+                if $crate::log::Logger::enable() && $crate::log::Logger::filter(module_path!(),$crate::log::LogLvl::Debug) {
                 use std::io::{self, Write};
                 // Panics if writing to io::stdout() fails.           
-               &mut io::stderr().write_all(LogMsg::new(loc!(),format_args!($($arg)*),LogLvl::Debug).call().as_bytes()).unwrap();
+               &mut io::stderr().write_all($crate::log::LogMsg::new(loc!(),format_args!($($arg)*),$crate::log::LogLvl::Debug).call().as_bytes()).unwrap();
                 }
         );
 }
 
-/// @`log `   Equal to `db!()`
+/// Equal to `db!()`
 #[macro_export]
 macro_rules! debug {
         ($($arg:tt)*) => (
             db!($($arg)*)
         );
 }
-/// @`log `
 #[macro_export]
 macro_rules! dbln { 
        () => (db!("\n"));
        ($fmt:expr) => (db!(concat!($fmt, "\n")));
        ($fmt:expr, $($arg:tt)*) => (db!(concat!($fmt, "\n"), $($arg)*));
 }
-/// @`log `   Equal to `dbln!()`
+/// Equal to `dbln!()`
 #[macro_export]
 macro_rules! debugln {
         ($($arg:tt)*) => (
@@ -73,19 +81,17 @@ macro_rules! debugln {
         );
 }
 
-/// @`log `   dbst!,dbstln!
 #[macro_export]
 macro_rules! dbst {
         ($($arg:tt)*) => (
-                if Logger::enable() &&Logger::filter( pkg!(),LogLvl::Debug) {
+                if $crate::log::Logger::enable() &&$crate::log::Logger::filter( module_path!(),$crate::log::LogLvl::Debug) {
                 use std::io::{self, Write};
                     // Do nothing if writing to io::stdout() fails(silent->st).
-               let _= &mut io::stderr().write_all(LogMsg::new(loc!(),format_args!($($arg)*),LogLvl::Debug).call().as_bytes());
+               let _= &mut io::stderr().write_all($crate::log::LogMsg::new(loc!(),format_args!($($arg)*),$crate::log::LogLvl::Debug).call().as_bytes());
                 }
         );
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! dbstln {
        () => (dbst!("\n"));
@@ -94,19 +100,20 @@ macro_rules! dbstln {
         // Do nothing if writing to io::stdout() fails(silent->st).
 }
 
-/// @`log `
+/// write the `LogMsg` to `stderr` and `panic` with the `LogMsg`
 #[macro_export]
 macro_rules! fatal {
         ($($arg:tt)*) => (
-                if Logger::enable() &&Logger::filter(pkg!(),LogLvl::Fatal) {
-                use std::io::{self, Write};
-                // Panics if writing to io::stdout() fails.           
-               &mut io::stderr().write_all(LogMsg::new(loc!(),format_args!($($arg)*),LogLvl::Fatal).call().as_bytes()).unwrap();
+                use std::io::{self, Write};                
+                let log_str = $crate::log::LogMsg::new(loc!(),format_args!($($arg)*),$crate::log::LogLvl::Fatal).call();
+                if $crate::log::Logger::enable() &&$crate::log::Logger::filter(module_path!(),$crate::log::LogLvl::Fatal) {
+                &mut io::stderr().write_all(log_str.as_bytes()).unwrap();
                 }
+                panic!("{}",log_str);                
         );
 }
 
-/// @`log `
+/// write the `LogMsg` to `stderr` and `panic` with the `LogMsg`
 #[macro_export]
 macro_rules! fataln { 
        () => (fatal!("\n"));
@@ -114,19 +121,17 @@ macro_rules! fataln {
        ($fmt:expr, $($arg:tt)*) => (fatal!(concat!($fmt, "\n"), $($arg)*));
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! error {
         ($($arg:tt)*) => (
-                if Logger::enable() &&Logger::filter(pkg!(),LogLvl::Error) {
+                if $crate::log::Logger::enable() &&$crate::log::Logger::filter(module_path!(),$crate::log::LogLvl::Error) {
                 use std::io::{self, Write};
                 // Panics if writing to io::stdout() fails.           
-               &mut io::stderr().write_all(LogMsg::new(loc!(),format_args!($($arg)*),LogLvl::Error).call().as_bytes()).unwrap();
+               &mut io::stderr().write_all($crate::log::LogMsg::new(loc!(),format_args!($($arg)*),$crate::log::LogLvl::Error).call().as_bytes()).unwrap();
                 }
         );
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! errorln { 
        () => (error!("\n"));
@@ -134,19 +139,17 @@ macro_rules! errorln {
        ($fmt:expr, $($arg:tt)*) => (error!(concat!($fmt, "\n"), $($arg)*));
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! warn {
         ($($arg:tt)*) => (
-                if Logger::enable() &&Logger::filter(pkg!(),LogLvl::Warn) {
+                if $crate::log::Logger::enable() &&$crate::log::Logger::filter(module_path!(),$crate::log::LogLvl::Warn) {
                 use std::io::{self, Write};
                 // Panics if writing to io::stdout() fails.           
-               &mut io::stderr().write_all(LogMsg::new(loc!(),format_args!($($arg)*),LogLvl::Warn).call().as_bytes()).unwrap();
+               &mut io::stderr().write_all($crate::log::LogMsg::new(loc!(),format_args!($($arg)*),$crate::log::LogLvl::Warn).call().as_bytes()).unwrap();
                 }
         );
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! warnln { 
        () => (warn!("\n"));
@@ -154,19 +157,17 @@ macro_rules! warnln {
        ($fmt:expr, $($arg:tt)*) => (warn!(concat!($fmt, "\n"), $($arg)*));
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! info {
         ($($arg:tt)*) => (
-                if Logger::enable() &&Logger::filter(pkg!(),LogLvl::Info) {
+                if $crate::log::Logger::enable() &&$crate::log::Logger::filter(module_path!(),$crate::log::LogLvl::Info) {
                 use std::io::{self, Write};
                 // Panics if writing to io::stdout() fails.           
-               &mut io::stderr().write_all(LogMsg::new(loc!(),format_args!($($arg)*),LogLvl::Info).call().as_bytes()).unwrap();
+               &mut io::stderr().write_all($crate::log::LogMsg::new(loc!(),format_args!($($arg)*),$crate::log::LogLvl::Info).call().as_bytes()).unwrap();
                 }
         );
 }
 
-/// @`log `
 #[macro_export]
 macro_rules! infoln { 
        () => (info!("\n"));

@@ -1,5 +1,3 @@
-pub const LogLvlStr: &'static str = "Off Fatal Error Warn Info Debug All 0 1 2 3 4 5 6";
-
 /// Log Level
 #[derive(Debug,PartialEq,PartialOrd)]
 pub enum LogLvl {
@@ -34,7 +32,7 @@ pub enum LogLvl {
 }
 impl Default for LogLvl {
     fn default() -> Self {
-        LogLvl::All
+        LogLvl::Info
     }
 }
 
@@ -47,15 +45,16 @@ impl LogLvl {
     /// "Off Fatal Error Warn Info Debug All 0 1 2 3 4 5 6"
     ///.split(' ').map(|s|s.trim().to_string())
     ///`
+    #[allow(unknown_lints,should_implement_trait)]
     pub fn from_str(str: &str) -> Option<Self> {
-        match str {  
-            "Off" | "0" => Some(LogLvl::Off),
-            "Fatal" | "1" => Some(LogLvl::Fatal),
-            "Error" | "2" => Some(LogLvl::Error),
-            "Warn" | "3" => Some(LogLvl::Warn),
-            "Info" | "4" => Some(LogLvl::Info),
-            "Debug" | "5" => Some(LogLvl::Debug),
-            "All" | "6" => Some(LogLvl::All),
+        match str.to_lowercase().as_str() {  
+            "off" | "0" => Some(LogLvl::Off),
+            "fatal" | "1" => Some(LogLvl::Fatal),
+            "error" | "2" => Some(LogLvl::Error),
+            "warn" | "3" => Some(LogLvl::Warn),
+            "info" | "4" | "" => Some(LogLvl::Info),
+            "debug" | "5" => Some(LogLvl::Debug),
+            "all" | "6" | "*" => Some(LogLvl::All),
             _ => None, 
         }
     }
@@ -87,6 +86,7 @@ is_interger! {i8 u8 i16 u16 i32 u32 i64 u64 isize usize}
 
 #[test]
 fn lvl() {
+    const LogLvlStr: &'static str = "Off Fatal Error Warn Info Debug All 0 1 2 3 4 5 6";
     let nums: Vec<LogLvl> = (0..7).map(|s| LogLvl::form_num(s).unwrap()).collect();
     println!("{:?}", nums);
     let strs: Vec<LogLvl> = LogLvlStr

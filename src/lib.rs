@@ -1,112 +1,112 @@
+/*!
+# [stderr](https://github.com/biluohc/stderr)
+  A library that using macro to write to `io::stderr()` like `print!()/println!()`.
 
-//!# [stderr](https://github.com/biluohc/stderr)
-//!  A library that using macro to write to `io::stderr()` like `print!()/println!()`.
-//!
-//!## Usage
-//!
-//! On Cargo.toml:
-//!
-//! ```toml
-//!  [dependencies]
-//!  stderr = "0.8.0"
-//! ```
-//!
-//!## About stderr
-//!Usage as same as `print!/println!`.
-//!
-//!1. `err!`/`errln!`: Panics if writing to `io::stderr()` fails.
-//!2. `errst!`/`errstln!`: Do nothing if writing to `io::stderr()` fails(silent->st).
-//!
-//!
-//!## Example
-//!
-//!```Rust
-//!#[macro_use]
-//!extern crate stderr;
-//!
-//!fn main() {
-//!  println!("err!/errln!/errst!/errstln!()@stderr !");
-//!  let vec = vec![1, 2, 3, 4, 5];
-//!  let s = std::env::args().nth(0).unwrap();
-//!
-//!  err!("err!(expr\\n)\n");
-//!  err!("err!(String: vec![1, 2, 3, 4, 5])\n{}: {:?}", s, vec);
-//!  errln!();
-//!  errln!("errln!(expr)");
-//!
-//!  println!();
-//!
-//!  errst!("errst!(expr\\n)\n");
-//!  errst!("errst!(String: vec![1, 2, 3, 4, 5])\n{}: {:?}", s, vec);
-//!  errstln!();
-//!  errstln!("errstln!(expr)");
-//!
-//!  // If you need to use `dbxxx!`,you must run `Logger::init(pkg!())` or `logger_init!()` before use them on current process.
-//!  // Otherwise you should ignore the following.
-//!
-//!  use stderr::*;  // `dbxxx!` belongs the module.
-//!  Loger::init(module_path!());
-//!  dbln!();
-//!  dbln!("db!/dbln!()@Loger !");
-//!  db!("{}\n", s);
-//!  dbln!("{:?}", vec);
-//!
-//!  dbstln!();
-//!  dbstln!("dbst!/dbstln!()@Loger !");
-//!  dbst!("{}\n", s);
-//!  dbstln!("{:?}", vec);
-//!}
-//!```
-//!
-//!## About stderr::log::*
-//!`db!()`/`dbln!()`/`dbst!()`/`dbstln!()` print message while command line arguments conntains `-log` or `--log`(follows as [`module_path!()`](https://doc.rust-lang.org/std/macro.module_path.html),
-//!if it has no followers(None) or followers by `''`,will print the message them occurred on current project(Use a stderr crate.)
-//!
-//!or environment variable 'LOG' as [`module_path!()`](https://doc.rust-lang.org/std/macro.module_path.html).
-//!
-//!if Value is None(`LOG=`) or (`LOG=''`),as same as above.
-//!
-//!Ps: fish can not set None.
-//!### Example(if crate'name is 'app', a dependency's name is crate_lib):
-//!
-//!### Bash
-//!
-//!```bash
-//!   env LOG=app  app_file_path
-//!   env LOG=     app_file_path
-//!   env LOG=''   app_file_path
-//!   env LOG=app::mod1         app_file_path
-//!   env LOG=app::mod1::mod2   app_file_path
-//!   env LOG=* app_file_path   #use '*' to match all.
-//!   env LOG=app,crate_lib   app_file_path     #print the message occurred on app or crate_lib
-//!
-//!   app_file_path --log app
-//!   app_file_path --log
-//!   app_file_path --log '' # use '' to avoid shell explain it.
-//!
-//!   app_file_path --log app::mod1
-//!   app_file_path --log app::mod1::mod2
-//!   app_file_path --log '*' # use '' to avoid shell explain it.
-//!   app_file_path --log app,crate_lib
-//!```
-//!### Fish
-//!```fish
-//! set -x LOG app ; and app_file_path
-//! set -x LOG '' ;and app_file_path
-//! set -x LOG app::mod1 ;and app_file_path
-//! set -x app::mod1::mod2 ;and app_file_path
-//! set -x '*' ; and app_file_path
-//! set -x 'app,crate_lib' ; and app_file_path
-//!```
-//!
-//!If you neend to use `db!(),dbln!()` ,etc:
-//!
-//!You must use `Loger::init(module_path!())` or `init!()` before use them on the current process.
-//!
+# Usage
+
+ On Cargo.toml:
+
+ ```toml
+  [dependencies]
+  stderr = "0.8.0"
+ ```
+
+# About stderr
+Usage as same as `print!/println!`.
+
+1. `err!`/`errln!`: Panics if writing to `io::stderr()` fails.
+2. `errst!`/`errstln!`: Do nothing if writing to `io::stderr()` fails(silent->st).
+
+
+# Example
+
+```Rust
+#[macro_use]
+extern crate stderr;
+
+fn main() {
+  println!("err!/errln!/errst!/errstln!()@stderr !");
+  let vec = vec![1, 2, 3, 4, 5];
+  let s = std::env::args().nth(0).unwrap();
+
+  err!("err!(expr\\n)\n");
+  err!("err!(String: vec![1, 2, 3, 4, 5])\n{}: {:?}", s, vec);
+  errln!();
+  errln!("errln!(expr)");
+
+  println!();
+
+  errst!("errst!(expr\\n)\n");
+  errst!("errst!(String: vec![1, 2, 3, 4, 5])\n{}: {:?}", s, vec);
+  errstln!();
+  errstln!("errstln!(expr)");
+}
+```
+# You only need `err,errln,errst,errstln` and don't want be polluted by other macros, you can
+* use v0.3.0(The part has been stable since this version)
+
+On toml
+
+```toml
+  [dependencies]
+  stderr = "0.3.0"
+```
+
+## Or
+
+* Only import you need by `macro_use`
+
+```rustful
+  #[macro_use(err,errln,errst,errstln)]
+  extern crate stderr;
+```
+
+# About [stderr::StaticMut](struct.StaticMut.html)
+
+[`StaticMut`](struct.StaticMut.html): Internal variability for [`Lazystatic`](https://crates.io/crates/lazy_static)
+
+*/
 #[macro_use]
 extern crate lazy_static;
 extern crate time;
+/** `log module`
+
+`dbxx!()`/`infoxx!()`/`warnxx!()`/`errorxx!()/fatalxx` print message while  environment variable 'LOG' or command line arguments conntains `-log` or `--log`
+
+**Synntax: `LogLvl?/module_path,*`**
+
+`Logger` will init by above value, stderr will print the message at `stderr()` if them's location and level pass `Logger::filter()`(Use a stderr crate.)
+
+### Example(if crate'name is 'app', a dependency's name is map):
+
+### Bash
+
+```bash
+   env LOG=/                # -> `all/app`
+   env LOG="info/app"       # -> `info/app`
+   env LOG="info/app,map"   # -> `info/app,map`
+```
+*/
+///`    env LOG=info/*         # -> "info/*"`  ,`#` is all crate
+/**
+### Fish
+```fish
+ set -x LOG /                # -> `all/app`
+ set -x LOG "info/app"       # -> `info/app`
+ set -x LOG "info/app,map"   # -> `info/app,map`
+ set -e LOG                  # remove environment variable
+```
+### Cli_Options_Argument
+
+```sh
+   ./app -log   /               # -> `all/app`
+   ./app -log   info/app        # -> `info/app`
+   ./app -log   info/app,map    # -> `info/app,map`
+```
+You must use `logger_init!()` before use them on the current process.
+*/
 pub mod log;
+include!("static_mut.rs");
 
 // err!,errln!
 /// `print!()` for stderr
