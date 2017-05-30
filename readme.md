@@ -47,10 +47,10 @@ fn main() {
   errstln!("errstln!(expr)");
 }
 ```
-# You only need `err,errln,errst,errstln` and don't want be polluted by other macros, you can
+# If you only need `errxxx` and don't want be polluted by other macros, you can: 
 * use v0.3.0(The part has been stable since this version)
 
-On toml
+On Cargo.toml:
 
 ```toml
   [dependencies]
@@ -61,12 +61,14 @@ On toml
 
 * Only import you need by `macro_use`
 
+On Code:
+
 ```rust
   #[macro_use(err,errln,errst,errstln)]
   extern crate stderr;
 ```
 
-# About `StaticMut` and `log::*`, please read [document](https://docs.rs/stderr)
+# About `StaticMut` or `log::*`, please read [document](https://docs.rs/stderr)
 
 ## ChangLog
 2017-0530 **0.8.0** `log::*, StaticMut`

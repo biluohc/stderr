@@ -1,6 +1,6 @@
 /*!
 # [stderr](https://github.com/biluohc/stderr)
-  A library that using macro to write to `io::stderr()` like `print!()/println!()`.
+  A library that using macro to write to `io::stderr()` like `print!()/println!()` for rust.
 
 # Usage
 
@@ -42,10 +42,10 @@ fn main() {
   errstln!("errstln!(expr)");
 }
 ```
-# You only need `err,errln,errst,errstln` and don't want be polluted by other macros, you can
+# If you only need `errxxx` and don't want be polluted by other macros, you can: 
 * use v0.3.0(The part has been stable since this version)
 
-On toml
+On Cargo.toml:
 
 ```toml
   [dependencies]
@@ -55,6 +55,8 @@ On toml
 ## Or
 
 * Only import you need by `macro_use`
+
+On Code:
 
 ```rustful
   #[macro_use(err,errln,errst,errstln)]

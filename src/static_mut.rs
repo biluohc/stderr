@@ -1,4 +1,4 @@
-/** `Internal variability` for `Lazystatic`
+/** `Internal variability` for [`Lazystatic`](https://crates.io/crates/lazy_static)
 
 ## Example:
 
