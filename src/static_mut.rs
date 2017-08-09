@@ -32,13 +32,13 @@ fn main() {
     };
     // But when write it, operate it Concurrent is unsafe.
     {
-        STRING.set(str).unwrap(); // update by setting value
-        USIZE.as_mut().unwrap().0 = 123; // update by modifying field
+        STRING.set(str); // update by setting value
+        USIZE.as_mut().0 = 123; // update by modifying field
     }
 
     // After write, You can read it Concurrent safely.
-    println!("{:?}", STRING.get());
-    println!("{:?}", USIZE.get());
+    println!("{:?}", STRING.as_ref());
+    println!("{:?}", USIZE.as_ref());
 }
 
 #[derive(Debug)]
@@ -62,30 +62,31 @@ use std::cell::UnsafeCell;
 unsafe impl<T> Sync for StaticMut<T> {}
 
 impl<T> StaticMut<T> {
+    #[inline]    
     pub fn new(value: T) -> Self {
         StaticMut(UnsafeCell::new(value))
     }
     /// read it
     #[inline]
     #[allow(unknown_lints,should_implement_trait)]
-    pub fn as_ref(&self) -> Option<&T> {
-        unsafe { self.0.get().as_ref() }
-    }
-    /// read it with `unwrap()`
-    #[inline]
-    pub fn get(&self) -> &T {
-        self.as_ref().unwrap()
+    pub fn as_ref(&self) -> &T {
+        unsafe { self.0.get().as_ref().unwrap() }
     }
     /// write it
     #[allow(unknown_lints,mut_from_ref)]
     #[inline]
-    pub fn as_mut(&self) ->Option<&mut T> {
-        unsafe { self.0.get().as_mut() }
+    pub fn as_mut(&self) -> &mut T {
+        unsafe { self.0.get().as_mut().unwrap() }
     }
-    /// write it(returns value `is_some()` if update success)
+    /// update it
     #[inline]
-    pub fn set(&self, value:T)-> Option<()> {
-        self.as_mut().map(|v|*v =value)
+    pub fn set(&self, value:T) {
+        *self.as_mut() = value
+    }
+    ///Unwraps the value
+    #[inline]
+    pub fn into_inner(self)->T {
+        unsafe {self.0.into_inner()}
     }
 }
 

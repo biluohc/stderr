@@ -37,7 +37,7 @@ impl Logger {
     pub fn set_info_all() {
         Self::initialized_set(true);
         Self::enable_set(true);
-        let mut logger = LOGGER.as_mut().unwrap();
+        let mut logger = LOGGER.as_mut();
         logger.mod_paths.insert("*".to_string());
         logger.max_lvl = LogLvl::Info;
     }
@@ -50,29 +50,32 @@ impl Logger {
         Self::enable_set(false);
     }
     pub fn initialized() -> bool {
-        LOGGER.get().initialized.load(Ordering::Relaxed)
+        LOGGER.as_ref().initialized.load(Ordering::Relaxed)
     }
     pub fn initialized_set(b: bool) {
-        LOGGER.get().initialized.store(b, Ordering::SeqCst);
+        LOGGER.as_ref().initialized.store(b, Ordering::SeqCst);
     }
     pub fn enable() -> bool {
-        LOGGER.get().enabled.load(Ordering::Relaxed)
+        LOGGER.as_ref().enabled.load(Ordering::Relaxed)
     }
     pub fn enable_set(b: bool) {
-        LOGGER.get().enabled.store(b, Ordering::SeqCst);
+        LOGGER.as_ref().enabled.store(b, Ordering::SeqCst);
     }
     pub fn without_cli_options() -> bool {
-        LOGGER.get().without_cli_options.load(Ordering::Relaxed)
+        LOGGER.as_ref().without_cli_options.load(Ordering::Relaxed)
     }
     pub fn without_cli_options_set(b: bool) {
-        LOGGER.get().without_cli_options.store(b, Ordering::SeqCst);
+        LOGGER
+            .as_ref()
+            .without_cli_options
+            .store(b, Ordering::SeqCst);
     }
     pub fn max_lvl() -> &'static LogLvl {
-        &LOGGER.get().max_lvl
+        &LOGGER.as_ref().max_lvl
     }
     /// `mod_path[s]`
     pub fn mps() -> Iter<'static, String> {
-        LOGGER.get().mod_paths.iter()
+        LOGGER.as_ref().mod_paths.iter()
     }
     /// The current time in the local timezone
     pub fn now() -> Tm {
@@ -131,7 +134,7 @@ impl Logger {
         // no_input    -> info/*
         // /           -> all/pkg
         // lvl/mods    -> lvl/mods
-        let mut logger = LOGGER.as_mut().unwrap();
+        let mut logger = LOGGER.as_mut();
         // avoid init second
         if logger.initialized.load(Ordering::Relaxed) {
             return;
@@ -180,7 +183,7 @@ impl Logger {
     }
     ///Log message occurs at current module and current LogLvl whether need output
     pub fn filter(mod_path: &str, lvl: LogLvl) -> bool {
-        let logger = LOGGER.get();
+        let logger = LOGGER.as_ref();
         // println!("LOGER::filter(mp: {:?},lvl: {:?}): {:?}",
         //          mod_path,
         //          lvl,
@@ -300,11 +303,11 @@ impl LogFmter {
             return;
         }
         LogFmterInitialized.store(true, Ordering::SeqCst);
-        LogFmterDefault.set(f.into()).unwrap()
+        LogFmterDefault.set(f.into())
     }
     /// Format `&LogMesg` by `LogFmter`
     pub fn call(msg: &LogMsg) -> String {
-        (LogFmterDefault.get().0)(msg)
+        (LogFmterDefault.as_ref().0)(msg)
     }
 }
 
