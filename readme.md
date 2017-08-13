@@ -13,7 +13,7 @@
 
  ```toml
   [dependencies]
-  stderr = "0.8.0"
+  stderr = "0.8.1"
  ```
 
 # About stderr
@@ -71,6 +71,8 @@ On Code:
 # About `StaticMut` or `log::*`, please read [document](https://docs.rs/stderr)
 
 ## ChangLog
+2017-0813 **0.8.1** remove `-log`
+
 2017-0530 **0.8.0** `log::*, StaticMut`
 
 2017-0424 **0.7.1** `loc!()` and `Loger::init(module_path!())`

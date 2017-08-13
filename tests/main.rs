@@ -35,5 +35,6 @@ fn main() {
 #[should_panic]
 fn fun() {
     logger_init!();
+    errln!("errln pkg!(): {}", pkg!());
     fataln!("I'm angry !!!");
 }

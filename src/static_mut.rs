@@ -5,7 +5,7 @@
 ### On Cargo.toml:
 ```toml
 lazy_static = "^0.2.8"
-stderr = "0.8.0" 
+stderr = "0.8.1" 
 ```
 
 ### On Code:

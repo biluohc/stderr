@@ -8,7 +8,7 @@
 
  ```toml
   [dependencies]
-  stderr = "0.8.0"
+  stderr = "0.8.1"
  ```
 
 # About stderr
@@ -73,7 +73,7 @@ extern crate lazy_static;
 extern crate time;
 /** `log module`
 
-`dbxx!()`/`infoxx!()`/`warnxx!()`/`errorxx!()/fatalxx` print message while  environment variable 'LOG' or command line arguments conntains `-log` or `--log`
+`dbxx!()`/`infoxx!()`/`warnxx!()`/`errorxx!()/fatalxx` print message while  environment variable `LOG` or command line arguments conntains `--log`
 
 **Synntax: `LogLvl?/module_path,*`**
 
@@ -98,12 +98,12 @@ extern crate time;
  set -x LOG "info/app,map"   # -> `info/app,map`
  set -e LOG                  # remove environment variable
 ```
-### Cli_Options_Argument
+### Cli_Option_Argument
 
 ```sh
-   ./app -log   /               # -> `all/app`
-   ./app -log   info/app        # -> `info/app`
-   ./app -log   info/app,map    # -> `info/app,map`
+   ./app --log   /               # -> `all/app`
+   ./app --log   info/app        # -> `info/app`
+   ./app --log   info/app,map    # -> `info/app,map`
 ```
 You must use `logger_init!()` before use them on the current process.
 */

@@ -1,15 +1,16 @@
 [package]
 name = "stderr"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["Wspsxing <biluohc@outlook.com>"]
+license = "MIT"
 
 description = "A library that using macro to write to io::stderr() like print!()/println!()."
 # homepage = "..."
 documentation = "https://docs.rs/stderr/"
 repository = "https://github.com/biluohc/stderr"
 readme = "readme.md"
-keywords = ["err","errst","log","static","print"]
-license = "MIT"
+categories = ["development-tools::procedural-macro-helpers","development-tools::debugging"]
+keywords = ["err","macros","log","static","print"]
 
 [badges]
 travis-ci = { repository = "biluohc/stderr" }

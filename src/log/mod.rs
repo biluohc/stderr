@@ -13,8 +13,8 @@ use std::env::var;
 use std::env::args;
 /// `"LOG"`
 pub static mut ENV_VAR_KEY: &'static str = "LOG";
-/// `["-log", "--log"]`
-pub static mut CLI_OPTION_KEYS: [&'static str; 2] = ["-log", "--log"];
+/// `"--log"`
+pub static mut CLI_OPTION_KEY: &'static str = "--log";
 
 lazy_static!{
     static ref LOGGER:StaticMut<Logger>=StaticMut::new(Logger::default());
@@ -29,7 +29,7 @@ pub struct Logger {
     enabled: AtomicBool,
     max_lvl: LogLvl,
     mod_paths: Set<String>,
-    without_cli_options: AtomicBool,
+    without_cli_option: AtomicBool,
 }
 
 impl Logger {
@@ -61,13 +61,13 @@ impl Logger {
     pub fn enable_set(b: bool) {
         LOGGER.as_ref().enabled.store(b, Ordering::SeqCst);
     }
-    pub fn without_cli_options() -> bool {
-        LOGGER.as_ref().without_cli_options.load(Ordering::Relaxed)
+    pub fn without_cli_option() -> bool {
+        LOGGER.as_ref().without_cli_option.load(Ordering::Relaxed)
     }
-    pub fn without_cli_options_set(b: bool) {
+    pub fn without_cli_option_set(b: bool) {
         LOGGER
             .as_ref()
-            .without_cli_options
+            .without_cli_option
             .store(b, Ordering::SeqCst);
     }
     pub fn max_lvl() -> &'static LogLvl {
@@ -86,15 +86,15 @@ impl Logger {
     /// `Logger::init(pkg!());` or `logger_int!()`
     ///
     /// **Notice**: `Logger` only init once time, other will be ignored.
-    fn cli_options(cli_option_keys: &[&'static str]) -> Option<String> {
+    fn cli_option(cli_option_key: &'static str) -> Option<String> {
         let mut args: Vec<String> = args().skip(1).collect();
         let idx = args.as_slice()
             .iter()
-            .position(|s| cli_option_keys.iter().any(|ss| ss == &s.as_str()));
-        // println!("cli_options: {:?} -> {:?}", idx, args);
+            .position(|s| cli_option_key == s.as_str());
+        // println!("cli_option: {:?} -> {:?}", idx, args);
         if let Some(idx) = idx {
             if args.len() >= idx + 2 {
-                // println!("cli_options/args[idx+1 = {}]: {:?}",idx+1, args[idx + 1]);
+                // println!("cli_option/args[idx+1 = {}]: {:?}",idx+1, args[idx + 1]);
                 return Some(args.remove(idx + 1));
             }
         }
@@ -113,10 +113,10 @@ impl Logger {
         }
         // println!("LOGER_after_env: {:?}\ncli::cli_options({:?}): {:?}",
         //          LOGGER.get(),
-        //          CLI_OPTION_KEYS,
-        //          Self::cli_options(&CLI_OPTION_KEYS[..]));
-        if !Self::initialized() && !Self::without_cli_options() {
-            if let Some(s) = Self::cli_options(unsafe { &CLI_OPTION_KEYS[..] }) {
+        //          CLI_OPTION_KEY,
+        //          Self::cli_option(CLI_OPTION_KEY));
+        if !Self::initialized() && !Self::without_cli_option() {
+            if let Some(s) = Self::cli_option(unsafe { CLI_OPTION_KEY }) {
                 Self::init_with_str(crate_name, s);
             }
         }
